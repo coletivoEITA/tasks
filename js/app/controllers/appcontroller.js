@@ -38,6 +38,7 @@ angular.module('Tasks').controller('AppController', [
 				this._$scope.route = this._$routeparams;
 				this._$scope.status.newListName = "";
 				this._$scope.settingsmodel = this._$settingsmodel;
+				this._$scope.currentUser = OC.getCurrentUser();
 
 				this._$listsbusinesslayer.init().then(function(results) {
 					Promise.all(results).then(function() {

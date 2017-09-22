@@ -57,7 +57,8 @@ angular.module('Tasks').controller('DetailsController', [
 					'id': 'various',
 					'categories': []
 				});
-				this._$scope.isAddingComment = false;
+				this._$scope.newComment = "";
+				this._$scope.newCommentTitle = "";
 				this._$scope.timers = [];
 				this._$scope.durations = [{
 						name: t('tasks', 'week'),
@@ -340,34 +341,28 @@ angular.module('Tasks').controller('DetailsController', [
 					this._$scope.setReminderDuration = function(taskID) {
 						return _tasksbusinesslayer.setReminder(_$scope.route.taskID);
 					};
-					this._$scope.addComment = function() {
-						var comment,
-							_this = this;
-						if (_$scope.CommentContent) {
-							_$scope.isAddingComment = true;
-							comment = {
-								tmpID: 'newComment' + Date.now(),
-								comment: _$scope.CommentContent,
-								taskID: _$scope.route.taskID,
-								time: moment().format('YYYYMMDDTHHmmss'),
-								name: $('#expandDisplayName').text()
-							};
-							_tasksbusinesslayer.addComment(comment, function(data) {
-								_$tasksmodel.updateComment(data);
-								_$scope.isAddingComment = false;
-							}, function() {
-								_$scope.isAddingComment = false;
-							});
-							_$scope.CommentContent = '';
-						}
+					this._$scope.addComment = function(task, newCommentTitle, newComment) {
+						var nc = {
+							id: Date.now().toString(),
+							name: newCommentTitle,
+							comment: newComment,
+							time: moment().format('YYYYMMDDTHHmmss'),
+							userID: OC.getCurrentUser().uid
+						};
+						var comms = task.comments;
+						comms.push(nc);
+						task.comments = comms;
+						_tasksbusinesslayer.doUpdate(task);
 					};
-					this._$scope.sendComment = function(event) {
-						if (event.keyCode === 13) {
-							return _$scope.addComment();
+					this._$scope.deleteComment = function(comment) {
+						var comments = _$scope.task.comments;
+						for (var i=0; i<comments.length; i++) {
+							if (comments[i] === comment) {
+								comments.splice(1, i);
+								break;
+							}
 						}
-					};
-					this._$scope.deleteComment = function(commentID) {
-						return _tasksbusinesslayer.deleteComment(_$scope.route.taskID, commentID);
+						_tasksbusinesslayer.doUpdate(_$scope.task);
 					};
 					this._$scope.commentStrings = function() {
 						return {

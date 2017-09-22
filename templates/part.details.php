@@ -116,6 +116,41 @@
                     </ui-select-choices>
                 </ui-select>
             </div>
+			<div class="section detail-comments">
+				<div class="newCommentRow comment note-body selectable handler">
+					<div class="authorRow">
+						<div class="avatar" avatar userID="{{ currentUser.uid }}" size="32"></div>
+						<div class="author">{{ currentUser.displayName }}</div>
+					</div>
+					<form class="newCommentForm">
+						<textarea rows="1" class="message" placeholder="Título" style="overflow: hidden; word-wrap: break-word; height: 34px;" ng-model="newCommentTitle"></textarea>
+						<button class="submit icon-confirm" ng-click="addComment(task, newCommentTitle, newComment)"> </button>
+						<div class="submitLoading icon-loading-small hidden"></div>
+					</form>
+				</div>
+
+				<div class="comment-body selectable handler" ng-click="editComment($event, task)" oc-click-focus="{selector: '.expandingArea textarea', timeout: 0}">
+					<div class="content-fakeable" ng-class="{'editing':route.parameter=='comment'}">
+						<div class="edit-view">
+							<div class="expandingArea active">
+								<pre><span></span><br /><br /></pre>
+								<textarea ng-model="newComment" ></textarea>
+							</div>
+						</div>
+					</div>
+				</div>
+				<ul>
+					<li ng-repeat="comment in task.comments" class="comment-item" rel=" {{ comment.id }} ">
+						<div class="avatar" avatar userID="{{ comment.userID }}" size="32"></div>
+						<a class="detail-delete end-edit" ng-click="deleteComment(comment)" ng-show="settingsmodel.getById('various').userID == comment.userID">
+							<span class="icon detail-delete ico-trash"></span>
+						</a>
+						<span class="username">{{ comment.name }}</span>
+						<div class="comment" ng-bind-html="comment.comment | linky:'_blank':{rel: 'nofollow'}"></div>
+						<span class="time"> {{ comment.time | dateFromNow }} </span>
+					</li>
+				</ul>
+			</div>
             <div class="section detail-note">
                 <div class="note">
                 	<div class="note-body selectable handler" ng-click="editNote($event, task)" oc-click-focus="{selector: '.expandingArea textarea', timeout: 0}">
@@ -136,19 +171,6 @@
                     </div>
                 </div>
             </div>
-<!--             <div class="section detail-comments">
-                <ul>
-                    <li ng-repeat="comment in task.comments" class="comment-item" rel=" {{ comment.id }} ">
-                        <div class="avatar" avatar userID="{{ comment.userID }}" size="32"></div>
-                        <a class="detail-delete end-edit" ng-click="deleteComment(comment.id)" ng-show="settingsmodel.getById('various').userID == comment.userID">
-                            <span class="icon detail-delete ico-trash"></span>
-                        </a>
-                        <span class="username">{{ comment.name }}</span>
-                        <div class="comment" ng-bind-html="comment.comment | linky:'_blank':{rel: 'nofollow'}"></div>
-                        <span class="time"> {{ comment.time | dateFromNow }} </span>
-                    </li>
-                </ul>
-            </div> -->
         </div>
         <div class="footer">
 <!--             <div class="detail-addcomment">

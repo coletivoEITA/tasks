@@ -45,6 +45,9 @@ angular.module('Tasks').factory('VTodo', ['$filter', 'ICalFactory', 'RandomStrin
 		if (this.components.jCal.length === 0) {
 			throw "invalid calendar";
 		}
+
+		this.loadComments();
+
 	}
 
 	VTodo.prototype = {
@@ -255,19 +258,46 @@ angular.module('Tasks').factory('VTodo', ['$filter', 'ICalFactory', 'RandomStrin
  			this.updateLastModified();
  			this.data = this.components.toString();
  		},
-		get comments() {
-			return null;
-		},
 		get loadedCompleted () {
 			return this.loaded;
 		},
 		set loadedCompleted (loadedCompleted) {
 			this.loaded = loadedCompleted;
 		},
+		get comments () {
+			return this._comments;
+		},
+		set comments (comments) {
+			this._comments = comments;
+			var vtodos = this.components.getAllSubcomponents('vtodo');
+			vtodos[0].removeAllProperties('comment');
+			for (var i=0; i<comments.length; i++) {
+				vtodos[0].addPropertyWithValue('comment',JSON.stringify(comments[i]));
+			}
+			this.data = this.components.toString();
+		},
 		updateLastModified () {
 			var vtodos = this.components.getAllSubcomponents('vtodo');
 			vtodos[0].updatePropertyWithValue('last-modified', ICAL.Time.now());
 			vtodos[0].updatePropertyWithValue('dtstamp', ICAL.Time.now());
+		},
+		loadComments () {
+			this._comments = [];
+			var vtodos = this.components.getAllSubcomponents('vtodo');
+			var commentRaw = vtodos[0].getAllProperties('comment');
+			if (commentRaw.length>0) {
+				for (var i=0; i<commentRaw.length; i++) {
+					try {
+						var commentObject = JSON.parse(commentRaw[i].getValues()[0]);
+						this._comments.push(commentObject);
+					} catch (e) {
+
+					}
+				}
+			}
+		},
+		log (val) {
+			console.log(val);
 		}
 	};
 
