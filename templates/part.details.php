@@ -140,7 +140,7 @@
 					</div>
 				</div>
 				<ul>
-					<li ng-repeat="comment in task.comments" class="comment-item" rel=" {{ comment.id }} ">
+					<li ng-repeat="comment in task.comments track by $index" class="comment-item" rel=" {{ comment.id }} ">
 						<div class="avatar" avatar userID="{{ comment.userID }}" size="32"></div>
 						<a class="detail-delete end-edit" ng-click="deleteComment(comment)" ng-show="settingsmodel.getById('various').userID == comment.userID">
 							<span class="icon detail-delete ico-trash"></span>
