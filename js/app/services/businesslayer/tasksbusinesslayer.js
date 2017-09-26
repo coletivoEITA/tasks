@@ -54,8 +54,7 @@ angular.module('Tasks').factory('TasksBusinessLayer', [
 
 			TasksBusinessLayer.prototype.getTask = function(calendar, uri) {
 				return this._$vtodoservice.get(calendar, uri).then(function(task) {
-					TasksModel.ad(task);
-					return task;
+					return new VTodo(task.calendar, task.properties, task.uri);
 				});
 			};
 
@@ -564,26 +563,6 @@ angular.module('Tasks').factory('TasksBusinessLayer', [
 					}
 					return requests;
 				}
-			};
-
-			TasksBusinessLayer.prototype.addComment = function(comment, onSuccess, onFailure) {
-				var success,
-				_this = this;
-				if (!onSuccess) {
-					onSuccess = function() {};
-				}
-				if (!onFailure) {
-					onFailure = function() {};
-				}
-				this._$tasksmodel.addComment(comment);
-				success = function(response) {
-					if (response.status === 'error') {
-						return onFailure();
-					} else {
-						return onSuccess(response.data);
-					}
-				};
-				return this._persistence.addComment(comment, success);
 			};
 
 			TasksBusinessLayer.prototype.deleteComment = function(taskID, commentID) {

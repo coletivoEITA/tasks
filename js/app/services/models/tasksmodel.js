@@ -91,7 +91,9 @@
 					}
 					entry = this.getByUri(task.uri);
 					entry.components = task.components;
-					entry.components.toString();
+					if (entry.components) {
+						entry.components.toString();
+					}
 					return entry;
 				};
 
@@ -387,9 +389,9 @@
 					return !moment(start, "YYYYMMDDTHHmmss").isValid() || moment(start, "YYYYMMDDTHHmmss").diff(moment(), 'days', true) < 0 || moment(due, "YYYYMMDDTHHmmss").diff(moment(), 'days', true) < 0;
 				};
 
-				TasksModel.prototype.addComment = function(comment) {
+				TasksModel.prototype.addComment = function(comment, taskID) {
 					var task;
-					task = this.getById(comment.taskID);
+					task = this.getById(taskID);
 					if (task.comments) {
 						task.comments.push(comment);
 					} else {
