@@ -123,31 +123,23 @@
 						<div class="author">{{ currentUser.displayName }}</div>
 					</div>
 					<form class="newCommentForm">
-						<textarea rows="1" class="message" placeholder="Título" style="overflow: hidden; word-wrap: break-word; height: 34px;" ng-model="newCommentTitle"></textarea>
-						<button class="submit icon-confirm" ng-click="addComment(task, newCommentTitle, newComment)"> </button>
+						<textarea rows="1" class="message" placeholder="<?php p($l->t('New comment')); ?>" style="overflow: hidden; word-wrap: break-word;" ng-keyup="autoGrow($event)" ng-model="newCommentContent"></textarea>
+						<button class="submit icon-confirm" ng-click="addComment($event, task, newCommentContent)"></button>
 						<div class="submitLoading icon-loading-small hidden"></div>
 					</form>
 				</div>
 
-				<div class="comment-body selectable handler" ng-click="editComment($event, task)" oc-click-focus="{selector: '.expandingArea textarea', timeout: 0}">
-					<div class="content-fakeable" ng-class="{'editing':route.parameter=='comment'}">
-						<div class="edit-view">
-							<div class="expandingArea active">
-								<pre><span></span><br /><br /></pre>
-								<textarea ng-model="newComment" ></textarea>
-							</div>
-						</div>
-					</div>
-				</div>
-				<ul>
-					<li ng-repeat="comment in task.comments track by $index" class="comment-item" rel=" {{ comment.id }} ">
-						<div class="avatar" avatar userID="{{ comment.userID }}" size="32"></div>
-						<a class="detail-delete end-edit" ng-click="deleteComment(comment)" ng-show="settingsmodel.getById('various').userID == comment.userID">
-							<span class="icon detail-delete ico-trash"></span>
-						</a>
-						<span class="username">{{ comment.name }}</span>
-						<div class="comment" ng-bind-html="comment.comment | linky:'_blank':{rel: 'nofollow'}"></div>
-						<span class="time"> {{ comment.time | dateFromNow }} </span>
+				<ul class="comments">
+					<li ng-repeat="comment in task.comments track by $index" class="comment" rel=" {{ comment.id }} ">
+            <div class="authorRow">
+  						<div class="avatar" avatar userID="{{ comment.userID }}" size="32"></div>
+  						<div class="author">{{ comment.displayName }}</div>
+              <a class="action edit icon-rename" title="<?php p($l->t('Edit comment')); ?>" ng-click="editComment(task, comment)" ng-show="settingsmodel.getById('various').userID == comment.userID"></a>
+              <a class="action delete icon-delete" title="<?php p($l->t('Delete comment')); ?>" ng-click="deleteComment($event, task, comment)" ng-show="settingsmodel.getById('various').userID == comment.userID"></a>
+              <div class="date" title="{{ comment.time | date:'medium' }}">{{ comment.time | dateFromNow }}</div>
+  					</div>
+						<div class="message" ng-bind-html="comment.comment | linky:'_blank':{rel: 'nofollow'}"></div>
+            <!--<div class="message-overlay" ng-show="showCommentOverlay($event)"></div>-->
 					</li>
 				</ul>
 			</div>

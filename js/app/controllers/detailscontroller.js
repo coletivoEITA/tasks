@@ -57,8 +57,6 @@ angular.module('Tasks').controller('DetailsController', [
 					'id': 'various',
 					'categories': []
 				});
-				this._$scope.newComment = "";
-				this._$scope.newCommentTitle = "";
 				this._$scope.timers = [];
 				this._$scope.durations = [{
 						name: t('tasks', 'week'),
@@ -341,34 +339,42 @@ angular.module('Tasks').controller('DetailsController', [
 					this._$scope.setReminderDuration = function(taskID) {
 						return _tasksbusinesslayer.setReminder(_$scope.route.taskID);
 					};
-					this._$scope.addComment = function(task, newCommentTitle, newComment) {
-						var nc = {
+					this._$scope.addComment = function($event, task, newCommentContent) {
+						$($event.target).next('.submitLoading').removeClass('hidden');
+						$($event.target).prev('.message').val('');
+						var comment = {
 							id: Date.now().toString(),
-							name: newCommentTitle,
-							comment: newComment,
-							time: moment().format('YYYYMMDDTHHmmss'),
+							displayName: OC.getCurrentUser().displayName,
+							comment: newCommentContent,
+							time: moment(),
 							userID: OC.getCurrentUser().uid
 						};
-						var comms = task.comments;
-						comms.push(nc);
-						task.comments = comms;
-						_tasksbusinesslayer.doUpdate(task);
+						_tasksbusinesslayer.getTask(task.calendar, task.uri).then( function (taskFromServer) {
+							var comms = taskFromServer.comments;
+							comms.unshift(comment);
+							_$scope.task.comments = comms;
+							_tasksbusinesslayer.doUpdate(task).then(function () {
+								$($event.target).next('.submitLoading').addClass('hidden');
+								_$scope.$apply();
+							});
+						});
 					};
-					this._$scope.deleteComment = function(comment) {
-						var comments = _$scope.task.comments;
-						for (var i=0; i<comments.length; i++) {
-							if (comments[i] === comment) {
-								comments.splice(1, i);
-								break;
+					this._$scope.deleteComment = function($event, task, comment) {
+						$($event.target).removeClass('icon-delete').addClass('icon-loading-small');
+						_tasksbusinesslayer.getTask(task.calendar, task.uri).then( function (taskFromServer) {
+							var comms = taskFromServer.comments;
+							for (var i=0; i<comms.length; i++) {
+								if (comms[i].id === comment.id) {
+									comms.splice(i, 1);
+									break;
+								}
 							}
-						}
-						_tasksbusinesslayer.doUpdate(_$scope.task);
-					};
-					this._$scope.commentStrings = function() {
-						return {
-							button: t('tasks', 'Comment'),
-							input: t('tasks', 'Add a comment')
-						};
+							_$scope.task.comments = comms;
+							_tasksbusinesslayer.doUpdate(task).then(function () {
+									$($event.target).removeClass('icon-loading-small').addClass('icon-delete');
+									_$scope.$apply();
+							});
+						});
 					};
 				this._$scope.addCategory = function(category, model) {
 					_$scope.task.categories = _$scope.task.cats;
@@ -381,6 +387,11 @@ angular.module('Tasks').controller('DetailsController', [
 				this._$scope.removeCategory = function(category, model) {
 					_$scope.task.categories = _$scope.task.cats;
 					_tasksbusinesslayer.doUpdate(_$scope.task);
+				};
+				this._$scope.autoGrow = function($event){
+					let textArea = $event.target;
+					textArea.style.height = '0px';
+					textArea.style.height = textArea.scrollHeight + 'px';
 				};
 			}
 
